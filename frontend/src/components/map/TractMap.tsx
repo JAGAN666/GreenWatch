@@ -98,7 +98,7 @@ export default function TractMap({
           },
           tracts: {
             type: "vector",
-            url: `pmtiles://${origin}/us_tracts.pmtiles`,
+            url: "pmtiles://https://pub-fc4358ea50ca43dfa65d6ec0b1f2cb8f.r2.dev/us_tracts.pmtiles",
           },
         },
         layers: [

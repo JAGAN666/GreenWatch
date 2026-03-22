@@ -53,9 +53,8 @@ def run():
     print("Parsing NRI data...")
     df = pd.read_csv(filepath, dtype={"TRACTFIPS": str}, low_memory=False)
 
-    # Filter to Virginia
-    df = df[df["STATEABBRV"] == "VA"].copy()
-    print(f"Found {len(df)} Virginia tracts in NRI data")
+    # No state filter — load all US tracts
+    print(f"Found {len(df)} US tracts in NRI data")
 
     # Print available risk columns
     risk_cols = [c for c in df.columns if c.endswith("_RISKS") or c == "RISK_SCORE"]

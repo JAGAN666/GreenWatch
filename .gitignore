@@ -39,3 +39,12 @@ Thumbs.db
 # Data pipeline downloads
 pipeline/data/raw/
 pipeline/data/processed/
+
+# Large data files
+frontend/public/*.pmtiles
+frontend/public/*.geojson
+pipeline/data/
+
+# Scoring service models
+scoring/app/models/__pycache__/
+scoring/**/__pycache__/

@@ -92,9 +92,8 @@ def run():
     # Read full file now
     df = pd.read_csv(filepath, dtype={id_col: str}, low_memory=False)
 
-    # Filter to Virginia
-    df = df[df[id_col].str.startswith(STATE_FIPS, na=False)].copy()
-    print(f"Found {len(df)} Virginia tracts in EJScreen data")
+    # No state filter — load all US tracts
+    print(f"Found {len(df)} US tracts in EJScreen data")
 
     with engine.begin() as conn:
         # Remove old proxy data

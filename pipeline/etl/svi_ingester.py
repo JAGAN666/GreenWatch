@@ -42,9 +42,8 @@ def run():
     print("Parsing SVI data...")
     df = pd.read_csv(filepath, dtype={"FIPS": str})
 
-    # Filter to Virginia (state FIPS 51)
-    df = df[df["ST_ABBR"] == "VA"].copy()
-    print(f"Found {len(df)} Virginia tracts in SVI data")
+    # No state filter — load all US tracts
+    print(f"Found {len(df)} US tracts in SVI data")
 
     # Relevant columns:
     # RPL_THEMES = Overall SVI percentile ranking

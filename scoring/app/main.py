@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import simulate, recompute, tract
+from app.api import simulate, recompute, tract, optimize
 
 app = FastAPI(
     title="GreenWatch Scoring Engine",
@@ -11,7 +11,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origin_regex=r"http://localhost:\d+",
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -19,6 +19,7 @@ app.add_middleware(
 app.include_router(simulate.router, prefix="/scoring")
 app.include_router(recompute.router, prefix="/scoring")
 app.include_router(tract.router, prefix="/scoring")
+app.include_router(optimize.router, prefix="/scoring")
 
 
 @app.get("/scoring/health")

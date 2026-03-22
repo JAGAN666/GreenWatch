@@ -50,9 +50,8 @@ def run():
         ],
     )
 
-    # Filter to Virginia
-    df = df[df["State/Territory"] == "Virginia"].copy()
-    print(f"Found {len(df)} Virginia tracts in CEJST v2.0 data")
+    # No state filter — load all US tracts
+    print(f"Found {len(df)} US tracts in CEJST v2.0 data")
 
     with engine.begin() as conn:
         # Remove old proxy data

@@ -38,27 +38,45 @@ ACS_VARIABLES = {
 
 
 def fetch_acs_year(year: int) -> pd.DataFrame:
-    """Fetch ACS 5-Year estimates for all Virginia tracts for a given year."""
+    """Fetch ACS 5-Year estimates for all US tracts by looping over states."""
+    from config import ALL_STATE_FIPS
+
     api_key = CENSUS_API_KEY or os.getenv("CENSUS_API_KEY", "")
     if not api_key:
         raise ValueError("CENSUS_API_KEY is not set")
 
     variables = ",".join(ACS_VARIABLES.keys())
-    url = (
-        f"https://api.census.gov/data/{year}/acs/acs5"
-        f"?get={variables}"
-        f"&for=tract:*&in=state:{STATE_FIPS}"
-        f"&key={api_key}"
-    )
+    all_dfs = []
 
-    print(f"Fetching ACS {year} data...")
-    resp = requests.get(url, timeout=60)
-    resp.raise_for_status()
-    data = resp.json()
+    print(f"Fetching ACS {year} data for {len(ALL_STATE_FIPS)} states...")
+    for i, state_fips in enumerate(ALL_STATE_FIPS):
+        url = (
+            f"https://api.census.gov/data/{year}/acs/acs5"
+            f"?get={variables}"
+            f"&for=tract:*&in=state:{state_fips}"
+            f"&key={api_key}"
+        )
 
-    headers = data[0]
-    rows = data[1:]
-    df = pd.DataFrame(rows, columns=headers)
+        try:
+            resp = requests.get(url, timeout=60)
+            resp.raise_for_status()
+            data = resp.json()
+
+            headers = data[0]
+            rows = data[1:]
+            state_df = pd.DataFrame(rows, columns=headers)
+            all_dfs.append(state_df)
+
+            if (i + 1) % 10 == 0:
+                print(f"  {i + 1}/{len(ALL_STATE_FIPS)} states fetched...")
+        except Exception as e:
+            print(f"  WARNING: State {state_fips} failed for {year}: {e}")
+            continue
+
+    if not all_dfs:
+        raise ValueError(f"No ACS data fetched for {year}")
+
+    df = pd.concat(all_dfs, ignore_index=True)
 
     # Build GEOID from state + county + tract
     df["geoid"] = df["state"] + df["county"] + df["tract"]
@@ -69,6 +87,7 @@ def fetch_acs_year(year: int) -> pd.DataFrame:
         if col in df.columns:
             df[col] = pd.to_numeric(df[col], errors="coerce")
 
+    print(f"  Total: {len(df)} tracts for ACS {year}")
     return df
 
 

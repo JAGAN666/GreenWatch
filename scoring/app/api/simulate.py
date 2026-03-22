@@ -1,8 +1,15 @@
+"""Simulation endpoint — run what-if scenarios for green investments."""
+
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.db import get_db
+from app.scoring.simulation_engine import (
+    Intervention,
+    Mitigation,
+    simulate,
+)
 
 router = APIRouter()
 
@@ -12,7 +19,7 @@ class InterventionInput(BaseModel):
     lat: float
     lng: float
     scale_value: float
-    scale_unit: str
+    scale_unit: str = ""
     parameters: dict | None = None
 
 
@@ -29,6 +36,8 @@ class SimulateRequest(BaseModel):
 
 class TractResult(BaseModel):
     geoid: str
+    county_name: str = ""
+    state_fips: str = ""
     current_drs: float
     predicted_drs: float
     delta_drs: float
@@ -51,12 +60,30 @@ class SimulateResponse(BaseModel):
 
 @router.post("/simulate", response_model=SimulateResponse)
 async def simulate_scenario(request: SimulateRequest, db: Session = Depends(get_db)):
-    # TODO: Implement simulation engine in Phase 2
-    return SimulateResponse(
-        total_population_affected=0,
-        total_tracts_affected=0,
-        equity_warnings_count=0,
-        equity_score=0.0,
-        summary_text="Simulation engine not yet implemented.",
-        affected_tracts=[],
-    )
+    """Run a what-if simulation with proposed interventions and mitigations."""
+
+    # Convert Pydantic models to dataclasses
+    interventions = [
+        Intervention(
+            type=i.type,
+            lat=i.lat,
+            lng=i.lng,
+            scale_value=i.scale_value,
+            scale_unit=i.scale_unit,
+            parameters=i.parameters or {},
+        )
+        for i in request.interventions
+    ]
+
+    mitigations = [
+        Mitigation(
+            type=m.type,
+            target_geoids=m.target_geoids,
+            parameters=m.parameters or {},
+        )
+        for m in request.mitigations
+    ]
+
+    result = simulate(db, interventions, mitigations)
+
+    return SimulateResponse(**result)

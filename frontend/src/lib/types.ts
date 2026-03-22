@@ -99,12 +99,10 @@ export interface SimulationTractResult {
 }
 
 export interface SimulationResult {
-  id: string;
-  scenario_id: string;
   total_population_affected: number;
   total_tracts_affected: number;
   equity_warnings_count: number;
   equity_score: number;
   summary_text: string;
-  tract_results: SimulationTractResult[];
+  affected_tracts: SimulationTractResult[];
 }

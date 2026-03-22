@@ -1,5 +1,4 @@
-const SCORING_URL =
-  process.env.SCORING_SERVICE_URL || "http://localhost:8000";
+// All scoring calls go through Next.js API routes (same-origin, no CORS issues)
 
 export async function simulateScenario(payload: {
   interventions: Array<{
@@ -16,31 +15,51 @@ export async function simulateScenario(payload: {
     parameters?: Record<string, unknown>;
   }>;
 }) {
-  const res = await fetch(`${SCORING_URL}/scoring/simulate`, {
+  const res = await fetch("/api/simulate", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });
   if (!res.ok) {
-    throw new Error(`Scoring service error: ${res.status} ${res.statusText}`);
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || `Simulation failed: ${res.status}`);
+  }
+  return res.json();
+}
+
+export async function optimizeScenario(payload: {
+  type: string;
+  scale_value: number;
+  scale_unit: string;
+  min_lat: number;
+  min_lng: number;
+  max_lat: number;
+  max_lng: number;
+}) {
+  const res = await fetch("/api/optimize", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || `Optimization failed: ${res.status}`);
   }
   return res.json();
 }
 
 export async function getTractScoring(geoid: string) {
-  const res = await fetch(`${SCORING_URL}/scoring/tract/${geoid}`);
+  const res = await fetch(`/api/tract/${geoid}`);
   if (!res.ok) {
-    throw new Error(`Scoring service error: ${res.status} ${res.statusText}`);
+    throw new Error(`Failed to fetch tract: ${res.status}`);
   }
   return res.json();
 }
 
 export async function recomputeScores() {
-  const res = await fetch(`${SCORING_URL}/scoring/recompute`, {
-    method: "POST",
-  });
+  const res = await fetch("/api/recompute", { method: "POST" });
   if (!res.ok) {
-    throw new Error(`Scoring service error: ${res.status} ${res.statusText}`);
+    throw new Error(`Recompute failed: ${res.status}`);
   }
   return res.json();
 }

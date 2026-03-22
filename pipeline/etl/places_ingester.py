@@ -69,14 +69,8 @@ def run():
         tract_data = {}  # geoid -> {asthma: val, mental: val}
 
         for chunk in chunks:
-            # Filter to Virginia
-            if state_col:
-                va_chunk = chunk[chunk[state_col] == "VA"]
-            else:
-                va_chunk = chunk[chunk[loc_col].str.startswith(STATE_FIPS, na=False)]
-
-            if va_chunk.empty:
-                continue
+            # No state filter — process all US tracts
+            va_chunk = chunk
 
             # Filter to crude prevalence if type column exists
             if type_col:

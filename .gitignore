@@ -48,3 +48,4 @@ pipeline/data/
 # Scoring service models
 scoring/app/models/__pycache__/
 scoring/**/__pycache__/
+.wrangler/

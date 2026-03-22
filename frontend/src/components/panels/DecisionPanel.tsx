@@ -299,7 +299,7 @@ export default function DecisionPanel({
               >
                 <div>
                   <div className="text-sm font-medium text-gray-200">
-                    {getDisplayName((tr as Record<string, unknown>).county_name as string || "", tr.geoid)}
+                    {getDisplayName((tr as unknown as Record<string, string>).county_name || "", tr.geoid)}
                   </div>
                   <div className="text-xs text-gray-500">
                     DRS: {tr.current_drs.toFixed(1)} &rarr;{" "}
